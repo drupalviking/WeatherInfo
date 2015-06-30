@@ -9,7 +9,7 @@
 namespace WeatherInfo\View\Helper;
 
 use Zend\View\Helper\AbstractHelper;
-use FlightInfo\Lib\Parsedown;
+use WeatherInfo\Lib\Parsedown;
 
 class Paragrapher extends AbstractHelper{
 

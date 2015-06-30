@@ -86,27 +86,25 @@ return array(
     'console' => array(
       'router' => array(
           'routes' => array(
-            'process-weather-info' => array(
+            'process-weather-forecasts' => array(
               'options' => array(
-                'route'    => 'process-weather-info',
+                'route'    => 'process weather forecasts',
                 'defaults' => array(
                   'controller' => 'WeatherInfo\Controller\Console',
-                  'action'     => 'process-weather-info'
+                  'action'     => 'process-weather-forecasts'
+                )
+              )
+            ),
+            'process-weather-stations' => array(
+              'options' => array(
+                'route'    => 'process weather stations',
+                'defaults' => array(
+                  'controller' => 'WeatherInfo\Controller\Console',
+                  'action'     => 'process-weather-stations'
                 )
               )
             ),
           ),
-
-          'process-weather-stations' => array(
-            'options' => array(
-              'route'    => 'process-weather-stations',
-              'defaults' => array(
-                'controller' => 'WeatherInfo\Controller\Console',
-                'action'     => 'process-weather-stations'
-              )
-            )
-          ),
-
       ),
     ),
 );
