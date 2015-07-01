@@ -185,6 +185,48 @@ class XMLStream implements DataSourceAwareInterface{
     }
   }
 
+  public function processTextForecasts(){
+    $forecastTypeService = new ForecastType();
+    $forecastTypeService->setDataSource($this->pdo);
+    $forecastTypes = $forecastTypeService->fetchAll();
+    $textForecastService = new TextForecast();
+    $textForecastService->setDataSource($this->pdo);
+
+    $typeString = "";
+    foreach($forecastTypes as $ftype){
+      $typeString .= $ftype->id . ";";
+    }
+
+    $textForecasts = $this->fetch("http://xmlweather.vedur.is/?op_w=xml&type=txt&lang=is&view=xml&ids=" . $typeString);
+    foreach($textForecasts->text as $tfcast){
+      if(is_string($tfcast->content)){
+        $creation_date = strtotime($tfcast->creation);
+        $valid_from = strtotime($tfcast->valid_from);
+        $valid_to = strtotime($tfcast->valid_to);
+        $id = $tfcast->{"@attributes"}->id;
+        $type = $forecastTypeService->get($id);
+
+        $data = array(
+          "id" => $id,
+          "creation_date" => $creation_date,
+          "valid_from" => $valid_from,
+          "valid_to" => $valid_to,
+          "content" => $tfcast->content
+        );
+
+        $forecastFromDatabase = $textForecastService->get($id, $creation_date);
+
+        if($forecastFromDatabase){
+          $textForecastService->update($data);
+        }
+        else{
+          $textForecastService->create($data);
+        }
+        echo "Done processing " . $type->type . "\n";
+      }
+    }
+  }
+
   /**
    * Fetches data from paths as a XML object, with GuzzleHttp client, and returns it as a stdClass objects
    *
@@ -314,7 +356,7 @@ class XMLStream implements DataSourceAwareInterface{
   }
 
   private function slugify($value){
-    $value = strtolower($value);
+    $value = mb_strtolower($value);
     $value = str_replace(' ', '_', $value);
     $value = str_replace('á', 'a', $value);
     $value = str_replace('Á', 'a', $value);

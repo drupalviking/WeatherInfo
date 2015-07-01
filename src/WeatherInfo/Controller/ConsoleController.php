@@ -27,6 +27,12 @@ class ConsoleController extends AbstractActionController{
     $xmlStreamService->processWeatherForecasts();
   }
 
+  public function processTextForecastsAction(){
+    $sm = $this->getServiceLocator();
+    $xmlStreamService = $sm->get('WeatherInfo\Service\XMLStream');
+    $xmlStreamService->processTextForecasts();
+  }
+
   public function processWeatherObservationsAction(){
     $sm = $this->getServiceLocator();
     $xmlStreamService = $sm->get('WeatherInfo\Service\XMLStream');

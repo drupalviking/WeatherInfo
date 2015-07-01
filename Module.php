@@ -74,6 +74,13 @@ class Module
 				},
 			),
 			'invokables' => [
+				'WeatherInfo\Service\ForecastArea' 		=> 'WeatherInfo\Service\ForecastArea',
+				'WeatherInfo\Service\ForecastType' 		=> 'WeatherInfo\Service\ForecastType',
+				'WeatherInfo\Service\StationOwner' 		=> 'WeatherInfo\Service\StationOwner',
+				'WeatherInfo\Service\StationType' 		=> 'WeatherInfo\Service\StationType',
+				'WeatherInfo\Service\TextForecast' 		=> 'WeatherInfo\Service\TextForecast',
+				'WeatherInfo\Service\WeatherForecast' 		=> 'WeatherInfo\Service\WeatherForecast',
+				'WeatherInfo\Service\WeatherStation' 		=> 'WeatherInfo\Service\WeatherStation',
 				'WeatherInfo\Service\XMLStream' 		=> 'WeatherInfo\Service\XMLStream',
 			],
 			'factories' => array(

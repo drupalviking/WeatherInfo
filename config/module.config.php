@@ -104,6 +104,15 @@ return array(
                 )
               )
             ),
+            'process-text-forecasts' => array(
+              'options' => array(
+                'route'    => 'process text forecasts',
+                'defaults' => array(
+                  'controller' => 'WeatherInfo\Controller\Console',
+                  'action'     => 'process-text-forecasts'
+                )
+              )
+            ),
             'process-weather-stations' => array(
               'options' => array(
                 'route'    => 'process weather stations',
