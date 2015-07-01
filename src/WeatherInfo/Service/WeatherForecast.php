@@ -99,7 +99,10 @@ class WeatherForecast implements DataSourceAwareInterface{
       $result = $statement->execute($data);
 
 
-      return $result;
+      return $this->get($data['station_id'],
+        $data['analysis_time'],
+        $data['forecast_time'],
+        $data['obs_forecast']);
     }
     catch( PDOException $e){
       echo "<pre>";
@@ -124,7 +127,7 @@ class WeatherForecast implements DataSourceAwareInterface{
         "station_id={$data['station_id']}
         AND analysis_time={$data['analysis_time']}
         AND forecast_time={$data['forecast_time']}
-        AND obs_forecast={$data['obs_forecast']}");
+        AND obs_forecast='{$data['obs_forecast']}'");
       $statement = $this->pdo->prepare($updateString);
       $statement->execute($data);
 

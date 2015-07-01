@@ -95,6 +95,15 @@ return array(
                 )
               )
             ),
+            'process-weather-observations' => array(
+              'options' => array(
+                'route'    => 'process weather observations',
+                'defaults' => array(
+                  'controller' => 'WeatherInfo\Controller\Console',
+                  'action'     => 'process-weather-observations'
+                )
+              )
+            ),
             'process-weather-stations' => array(
               'options' => array(
                 'route'    => 'process weather stations',

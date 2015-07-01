@@ -32,9 +32,143 @@ class XMLStream implements DataSourceAwareInterface{
 
     foreach($weatherForecasts->station as $forecast){
       if($forecast->{"@attributes"}->valid){
+        $weatherForecastService = new WeatherForecast();
+        $weatherForecastService->setDataSource($this->pdo);
+        foreach($forecast->forecast as $fcast){
+          $data = $this->createWeatherDataArray($forecast, $fcast, "forecast");
+
+          $forecastFromDatabase = $weatherForecastService->get(
+            $forecast->{"@attributes"}->id,
+            strtotime($forecast->atime),
+            strtotime($fcast->ftime),
+              "forecast");
+
+          if($forecastFromDatabase){
+            $weatherForecastService->update($data);
+          }
+          else{
+            $weatherForecastService->create($data);
+          }
+          echo "Processed " . $forecast->name . " @" . strftime("%d.%m.%Y %H:%M", $data['forecast_time']) . "\n";
+        }
+      }
+    }
+  }
+
+  public function processWeatherObservations(){
+    $weatherStationService = new WeatherStation();
+    $weatherStationService->setDataSource($this->pdo);
+    $weatherStationIds = $weatherStationService->fetchAllIds();
+    $idString = "";
+    foreach($weatherStationIds as $id){
+      $idString .= $id->id . ";";
+    }
+    $fetchString = "http://xmlweather.vedur.is/?op_w=xml&type=obs&lang=en&view=xml&ids={$idString}&time=1h";
+    $weatherForecasts = $this->fetch($fetchString);
+
+    foreach($weatherForecasts->station as $forecast){
+      if($forecast->{"@attributes"}->valid){
+        $weatherForecastService = new WeatherForecast();
+        $weatherForecastService->setDataSource($this->pdo);
+
+        $data = array(
+          "station_id" => $forecast->{"@attributes"}->id,
+          "analysis_time" => strtotime($forecast->time),
+          "forecast_time" => strtotime($forecast->time),
+          "obs_forecast" => "obs"
+        );
+        if(isset($forecast->F)){
+          $data["wind_force"] = (is_string($forecast->F) ? $forecast->F : null);
+        }
+        if(isset($forecast->FX)){
+          $data["wind_force_peak"] = (is_string($forecast->FX) ? $forecast->FX : null);
+        }
+        if(isset($forecast->FG)){
+          $data["wind_force_gust"] = (is_string($forecast->FG) ? $forecast->FG : null);
+        }
+        if(isset($forecast->D)){
+          $data["wind_direction"] = (is_string($forecast->D) ? $forecast->D : null);
+        }
+        if(isset($forecast->T)){
+          $data["temperature"] = (is_string($forecast->T) ? $forecast->T : null);
+        }
+        if(isset($forecast->W)){
+          $data["weather_description"] = (is_string($forecast->W) ? $forecast->W : null);
+        }
+        if(isset($forecast->V)){
+          $data["visibility"] = (is_string($forecast->V) ? $forecast->V : null);
+        }
+        if(isset($forecast->N)){
+          $data["clouds"] = (is_string($forecast->N) ? $forecast->N : null);
+        }
+        if(isset($forecast->P)){
+          $data["pressure"] = (is_string($forecast->P) ? $forecast->P : null);
+        }
+        if(isset($forecast->RH)){
+          $data["percipitation"] = (is_string($forecast->RH) ? $forecast->RH : null);
+        }
+        if(isset($forecast->SNC)){
+          $data["snow_description"] = (is_string($forecast->SNC) ? $forecast->SNC : null);
+        }
+        if(isset($forecast->SND)){
+          $data["snow_depth"] = (is_string($forecast->SND) ? $forecast->SND : null);
+        }
+        if(isset($forecast->SED)){
+          $data["ocean"] = (is_string($forecast->SED) ? $forecast->SED : null);
+        }
+        if(isset($forecast->RTE)){
+          $data["road_temperature"] = (is_string($forecast->RTE) ? $forecast->RTE : null);
+        }
+        if(isset($forecast->TD)){
+          $data["dew_point"] = (is_string($forecast->TD) ? $forecast->TD : null);
+        }
+        if(isset($forecast->R)){
+          $data["accumulated_rain"] = (is_string($forecast->R) ? $forecast->R : null);
+        }
+
+        $forecastFromDatabase = $weatherForecastService->get(
+          $forecast->{"@attributes"}->id,
+          strtotime($forecast->time),
+          strtotime($forecast->time),
+          "obs");
+
+        if($forecastFromDatabase){
+          $weatherForecastService->update($data);
+        }
+        else{
+          $weatherForecastService->create($data);
+        }
+        echo "Processed " . $forecast->name . " @" . strftime("%d.%m.%Y %H:%M", $data['forecast_time']) . "\n";
 
       }
     }
+  }
+
+  public function createWeatherDataArray($forecast, $fcast, $forecast_obs){
+    $data = array(
+      "station_id" => $forecast->{"@attributes"}->id,
+      "analysis_time" => strtotime($forecast->atime),
+      "forecast_time" => strtotime($fcast->ftime),
+      "obs_forecast" => $forecast_obs,
+      "wind_force" => (isset($fcast->F) ? $fcast->F : null),
+      "wind_force_peak" => (isset($fcast->FX) ? $fcast->FX : null),
+      "wind_force_gust" => (isset($fcast->FG) ? $fcast->FG : null),
+      "wind_direction" => (isset($fcast->D) ? $fcast->D : null),
+      "temperature" => (isset($fcast->T) ? $fcast->T : null),
+      "weather_description" => (isset($fcast->W) ? $fcast->W : null),
+      "visibility" => (isset($fcast->V) ? $fcast->V : null),
+      "clouds" => (isset($fcast->N) ? $fcast->N : null),
+      "pressure" => (isset($fcast->P) ? $fcast->P : null),
+      "percipitation" => (isset($fcast->RH) ? $fcast->RH : null),
+      "snow_description" => (isset($fcast->SNC) ? $fcast->SNC : null),
+      "snow_depth" => (isset($fcast->SND) ? $fcast->SND : null),
+      "ocean" => (isset($fcast->SED) ? $fcast->SED : null),
+      "road_temperature" => (isset($fcast->RTE) ? $fcast->RTE : null),
+      "dew_point" => (isset($fcast->TD) ? $fcast->TD : null),
+      "accumulated_rain" => (isset($fcast->R) ? $fcast->R : null)
+    );
+
+    return $data;
   }
 
   public function processWeatherStations(){
