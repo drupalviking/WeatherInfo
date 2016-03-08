@@ -67,15 +67,27 @@ class WeatherForecast implements DataSourceAwareInterface{
    * @return array
    * @throws Exception
    */
-  public function fetchAll($analysis_time){
+  public function fetchAll($obs_forecast){
     try{
       $statement = $this->pdo->prepare("
-        SELECT * FROM WeatherForecast
-        WHERE analysis_time = :analysis_time
+        SELECT * FROM weather_info.WeatherForecast wfc
+        INNER JOIN WeatherStation ws
+        ON wfc.station_id = ws.id
+        INNER JOIN StationType st
+        ON st.id = ws.type_id
+        INNER JOIN StationOwner so
+        ON so.id = ws.owner_id
+        WHERE obs_forecast = :obs_forecast
+        AND analysis_time =
+        (
+          SELECT max(analysis_time)
+          FROM WeatherForecast
+          WHERE obs_forecast = :obs_forecast
+        );
       ");
 
       $statement->execute(array(
-        "analysis_time" => $analysis_time,
+        "obs_forecast" => $obs_forecast,
       ));
 
       return $statement->fetchAll();

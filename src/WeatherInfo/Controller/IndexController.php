@@ -34,8 +34,12 @@ class IndexController extends AbstractActionController
         //  load all services
         $sm = $this->getServiceLocator();
         $weatherForecastService = $sm->get('WeatherInfo\Service\WeatherForecast');
+        $observations = $weatherForecastService->fetchAll("obs");
+        $forecasts = $weatherForecastService->fetchAll("forecast");
 
-
-        return new ViewModel();
+        return new ViewModel(array(
+            "observations" => $observations,
+            "forecasts" => $forecasts
+        ));
     }
 }
